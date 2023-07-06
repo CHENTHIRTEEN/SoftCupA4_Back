@@ -41,7 +41,7 @@ git clone https://github.com/CHENTHIRTEEN/SoftCupA4_Back.git
 cd SoftCupA4_Back
 pip install -r requirement.txt
 cd A4_Back
-python manage.py runserver
+python manage.py runserver 8888
 ```
 
 ### :fries: TODO
