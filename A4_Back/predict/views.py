@@ -40,7 +40,7 @@ def predict_dfloc(request) -> HttpResponse:
         # 导入模型
         model = joblib.load('model/XGB' + request.POST.get("TurbID") + '.pkl')
         res = model.predict(df.drop(['DATATIME', 'ROUND(A.POWER,0)'], axis=1))
-        data = {"DATATIME": new_df['DATATIME'].tolist(), "ROUND(A.POWER,0)": new_df['ROUND(A.POWER,0)'].tolist(),
+        data = {"DATATIME": new_df['DATATIME'].tolist(), "ROUND": new_df['ROUND(A.POWER,0)'].tolist(),
                 "YD15": res.tolist()}
         print(data)
         return HttpResponse(json.dumps({"code": 200, "message": "success", "data": data}))
