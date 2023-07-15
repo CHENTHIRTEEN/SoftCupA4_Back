@@ -7,10 +7,25 @@ from rest_framework.decorators import api_view
 from .util.toolUtil import datalist, framlist, dfloc
 
 
+@api_view(['POST'])
+def getdatarange(request) -> HttpResponse:
+    """
+    获取风场数据日期起始范围
+    @param request:
+    @return:
+    """
+    if request.method == 'POST':
+        # TurbID = request.POST.get("TurbID")
+        filename = "data/" + request.POST.get("TurbID") + ".csv"
+        df = pd.read_csv(filename, usecols=['DATATIME'])
+        start = df['DATATIME'].tolist()[0][0:10]
+        end = df['DATATIME'].tolist()[-1][0:10]
+        return HttpResponse(json.dumps({"code": 200, "message": "success", "start": start, "end": end}))
+
+
 @api_view(['GET'])
 def showframlist(request) -> HttpResponse:
     """
-
     @param request:
     @return:
     """
@@ -22,6 +37,11 @@ def showframlist(request) -> HttpResponse:
 
 @api_view(['POST'])
 def predict_dfloc(request) -> HttpResponse:
+    '''
+
+    @param request:
+    @return:
+    '''
     print(request.POST.get("endDatetime"))
     if request.method == 'POST':
         if request.POST.get("TurbID") == '':
@@ -42,5 +62,5 @@ def predict_dfloc(request) -> HttpResponse:
         res = model.predict(df.drop(['DATATIME', 'ROUND(A.POWER,0)'], axis=1))
         data = {"DATATIME": new_df['DATATIME'].tolist(), "ROUND": new_df['ROUND(A.POWER,0)'].tolist(),
                 "YD15": res.tolist()}
-        print(data)
+        # print(data)
         return HttpResponse(json.dumps({"code": 200, "message": "success", "data": data}))

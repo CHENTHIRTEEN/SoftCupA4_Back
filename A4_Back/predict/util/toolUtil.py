@@ -38,6 +38,21 @@ def dfloc(start: str, end: str, df):
     @param df:
     @return:
     """
+    if int(start[-5:-3]) % 15 != 0:
+        i = (int(start[-5:-3]) // 15) * 15
+        i = str(i)
+        if len(i) != 2:
+            i = '0' + i
+        start = start[:-5] + i + start[-3:]
+
+    if int(end[-5:-3]) % 15 != 0:
+        i = (int(end[-5:-3]) // 15) * 15
+        i = str(i)
+        if len(i) != 2:
+            i = '0' + i
+        end = end[:-5] + i + end[-3:]
+    print('+++++++++++++', start)
+    print('+++++++++++++', end)
     start = df[df['DATATIME'].str.startswith(start)].index[0]
     end = df[df['DATATIME'].str.startswith(end)].index[0]
     return df[start:end]
