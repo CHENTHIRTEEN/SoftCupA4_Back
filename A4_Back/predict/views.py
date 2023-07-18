@@ -1,11 +1,28 @@
 import json
 import joblib
-
+import os
 from django.http import HttpResponse
 import pandas as pd
 from rest_framework.decorators import api_view
 from .util.toolUtil import datalist, framlist, dfloc
 
+
+def upload(request) -> HttpResponse:
+    """上传文件"""
+    # 获取相对路径
+    if request.method == 'POST':
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        file = request.FILES.get('file', None)
+        path = BASE_DIR + '/data'
+        file_path = path + f'/{file.name}'
+        # 上传文件
+        try:
+            with open(file_path, 'wb') as f:
+                for chunk in file.chunks():
+                    f.write(chunk)
+            return HttpResponse(json.dumps({"code": 200, "message": "success"}))
+        except FileExistsError:
+            return HttpResponse(json.dumps({"code": 100, "message": "发生错误了捏"}))
 
 @api_view(['POST'])
 def getdatarange(request) -> HttpResponse:
@@ -55,7 +72,10 @@ def predict_dfloc(request) -> HttpResponse:
         # start = df[df['DATATIME'].str.startswith(request.startDatetime)].index[0]
         # end = df[df['DATATIME'].str.startswith(request.endDatetime)].index[0]
         # df = df[start:end].drop(['DATATIME'], axis=1)
-        df = dfloc(request.POST.get("startDatetime"), request.POST.get("endDatetime"), df)
+        try:
+            df = dfloc(request.POST.get("startDatetime"), request.POST.get("endDatetime"), df)
+        except IndexError:
+            return HttpResponse(json.dumps({"code": 100, "message": "选择时间段超出范围"}))
         new_df = df.copy()
         # 导入模型
         model = joblib.load('model/XGB' + request.POST.get("TurbID") + '.pkl')

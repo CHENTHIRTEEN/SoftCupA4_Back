@@ -7,4 +7,5 @@ urlpatterns = [
     path('showframlist', views.showframlist, name='showframlist'),
     path('predict_dfloc', views.predict_dfloc, name='predict_dfloc'),
     path('getdatarange', views.getdatarange, name='getdatarange'),
+    path('upload', views.upload, name='upload'),
 ]
