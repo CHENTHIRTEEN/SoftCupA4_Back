@@ -8,4 +8,7 @@ urlpatterns = [
     path('predict_dfloc', views.predict_dfloc, name='predict_dfloc'),
     path('getdatarange', views.getdatarange, name='getdatarange'),
     path('upload', views.upload, name='upload'),
+    path('data_process', views.data_process, name='data_process'),
+    path('frammanage', views.frammanage, name='frammanage'),
+    path('deletefile', views.deletefile, name='deletefile'),
 ]

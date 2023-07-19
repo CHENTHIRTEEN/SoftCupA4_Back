@@ -6,6 +6,10 @@ import os
 import pandas as pd
 
 
+def size_convert(size) -> float:
+    return round(size / 1048576, 2)
+
+
 def datalist() -> list:
     """
     列出所有数据集

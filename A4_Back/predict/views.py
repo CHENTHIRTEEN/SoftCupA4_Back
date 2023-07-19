@@ -1,17 +1,80 @@
 import json
+import time
+
 import joblib
 import os
 from django.http import HttpResponse
 import pandas as pd
 from rest_framework.decorators import api_view
-from .util.toolUtil import datalist, framlist, dfloc
+from .util.toolUtil import datalist, framlist, dfloc, size_convert
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+@api_view(['POST'])
+def deletefile(request) -> HttpResponse:
+    if request.method == 'POST':
+        id = request.POST.get("id")
+        path = 'data/' + id + '.csv'
+        try:
+            os.remove(path)
+            return HttpResponse(json.dumps({"code": 200, "message": "success"}))
+        except FileNotFoundError:
+            return HttpResponse(json.dumps({"code": 100, "message": "error"}))
+
+
+@api_view(['POST'])
+def frammanage(request) -> HttpResponse:
+    base = 'data/'
+    data = []
+    if request.method == 'POST':
+        files = datalist()
+        for file in files:
+            path = base + file
+            filemt = time.localtime(os.stat(path).st_mtime)
+            create_time = time.strftime("%Y-%m-%d %H:%M:%S", filemt)
+            id = file[:2]
+            size = size_convert(os.path.getsize(path))
+            type = file[-3:]
+            temp = {"date": create_time, "id": id, "size": size, "type": type}
+            data.append(temp)
+    return HttpResponse(json.dumps({"code": 200, "message": "success", "data": data}))
+
+
+@api_view(['POST'])
+def data_process(request) -> HttpResponse:
+    """
+    数据预处理
+    @param request:
+    @return:
+    """
+    if request.method == 'POST':
+        file = request.POST.get("file")
+        path = 'data/' + file
+        try:
+            df = pd.read_csv(path)
+            if '/' in df.DATATIME[1]:
+                datetime = pd.to_datetime(df.DATATIME, format='%d/%m/%Y %H:%M:%S')
+                new = datetime.dt.strftime("%Y-%m-%d %H:%M:%S")
+                df.DATATIME = new
+            df['ROUND(A.WS,1)'].fillna(df['WINDSPEED'], inplace=True)
+            df['ROUND(A.POWER,0)'].fillna(df['PREPOWER'], inplace=True)
+            df['YD15'].fillna(df['ROUND(A.POWER,0)'], inplace=True)
+            df.to_csv(path)
+            return HttpResponse(json.dumps({"code": 200, "message": "数据预处理成功"}))
+        except IOError:
+            return HttpResponse(json.dumps({"code": 100, "message": "数据预处理遇到问题"}))
+
+
+@api_view(['POST'])
 def upload(request) -> HttpResponse:
-    """上传文件"""
+    """
+    上传文件
+    @param request:
+    @return:
+    """
     # 获取相对路径
     if request.method == 'POST':
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         file = request.FILES.get('file', None)
         path = BASE_DIR + '/data'
         file_path = path + f'/{file.name}'
@@ -20,9 +83,24 @@ def upload(request) -> HttpResponse:
             with open(file_path, 'wb') as f:
                 for chunk in file.chunks():
                     f.write(chunk)
-            return HttpResponse(json.dumps({"code": 200, "message": "success"}))
-        except FileExistsError:
+
+            # time.sleep(1.5)
+            # datafile = '/data' + f'/{file.name}'
+            # df = pd.read_csv(datafile)
+            # if '/' in df.DATATIME[1]:
+            #     datetime = pd.to_datetime(df.DATATIME, format='%d/%m/%Y %H:%M:%S')
+            #     new = datetime.dt.strftime("%Y-%m-%d %H:%M:%S")
+            #     df.DATATIME = new
+            # df['ROUND(A.WS,1)'].fillna(df['WINDSPEED'], inplace=True)
+            # df['ROUND(A.POWER,0)'].fillna(df['PREPOWER'], inplace=True)
+            # df['YD15'].fillna(df['ROUND(A.POWER,0)'], inplace=True)
+            # df.to_csv('/data' + file.name)
+            return HttpResponse(json.dumps({"code": 200, "message": "上传成功"}))
+        except IOError:
             return HttpResponse(json.dumps({"code": 100, "message": "发生错误了捏"}))
+        # except IOError:
+        #     return HttpResponse(json.dumps({"code": 100, "message": "发生错误了捏"}))
+
 
 @api_view(['POST'])
 def getdatarange(request) -> HttpResponse:
