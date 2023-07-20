@@ -11,8 +11,38 @@ from .util.toolUtil import datalist, framlist, dfloc, size_convert
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+@api_view(['post'])
+def scatter(request) -> HttpResponse:
+    """
+
+    @param request:
+    @return:
+    """
+    if request.method == 'POST':
+        x = request.POST.get("value1")
+        y = request.POST.get("value2")
+        # id = request.POST.get("TurbID")
+        filename = "data/" + request.POST.get("TurbID") + ".csv"
+        df = pd.read_csv(filename, usecols=["WINDSPEED", "PREPOWER", "WINDDIRECTION", "TEMPERATURE", "HUMIDITY",
+                                            "PRESSURE", "ROUND(A.WS,1)", "ROUND(A.POWER,0)", "YD15"])
+        data = []
+        val1 = df[x].tolist()
+        val2 = df[y].tolist()
+        for i in range(len(val1) // 15):
+            res = []
+            res.append(val1[i*15])
+            res.append(val2[i*15])
+            data.append(res)
+        return HttpResponse(json.dumps({"code": 200, "message": "success", "data": data}))
+
+
 @api_view(['POST'])
 def deletefile(request) -> HttpResponse:
+    """
+
+    @param request:
+    @return:
+    """
     if request.method == 'POST':
         id = request.POST.get("id")
         path = 'data/' + id + '.csv'
@@ -25,6 +55,11 @@ def deletefile(request) -> HttpResponse:
 
 @api_view(['POST'])
 def frammanage(request) -> HttpResponse:
+    """
+
+    @param request:
+    @return:
+    """
     base = 'data/'
     data = []
     if request.method == 'POST':

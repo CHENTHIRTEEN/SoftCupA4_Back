@@ -11,4 +11,5 @@ urlpatterns = [
     path('data_process', views.data_process, name='data_process'),
     path('frammanage', views.frammanage, name='frammanage'),
     path('deletefile', views.deletefile, name='deletefile'),
+    path('scatter', views.scatter, name='scatter'),
 ]
