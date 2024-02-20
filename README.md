@@ -48,5 +48,5 @@ python manage.py runserver 8888
 - [x] 搭建项目框架
 - [x] 跨域配置
 - [ ] 删除requirement中的冗余包
-- [ ] 接口撰写
-- [ ] 机器学习推理接入 
+- [x] 接口撰写
+- [x] 机器学习推理接入 
